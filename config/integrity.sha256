@@ -1,0 +1,4 @@
+# Format: HASH  FILE_PATH
+# Generate these hashes using: Get-FileHash -Algorithm SHA256 -Path <filedestination>
+INSERT_MAIN_PS1_HASH_HERE  src/main.ps1
+INSERT_SETTINGS_B64_HASH_HERE  config/settings.b64
