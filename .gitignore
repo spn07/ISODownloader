@@ -1,0 +1,10 @@
+# Audit Logs (Privacy)
+/logs/
+*.log
+
+# Local Config with real hashes (Keep private)
+# config/settings.b64
+# config/integrity.sha256
+
+# PowerShell temp files
+*.ps1.old
