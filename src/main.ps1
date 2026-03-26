@@ -1,8 +1,8 @@
 [CmdletBinding()]
 param()
 
-$scriptpath = split-path -parent $myinvocation.mycommand.path
-$rootpath = split-path -parent $scriptpath
+$scriptpath = $PSScriptRoot
+$rootpath = Split-Path -Path $scriptpath -Parent
 $integrityfile = join-path $rootpath "config\integrity.sha256"
 $configfile = join-path $rootpath "config\settings.b64"
 $logpath = join-path $rootpath "logs"
@@ -15,7 +15,7 @@ function Write-SecureLog {
     param([string]$Message, [string]$level = "INFO")
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logentry = "[$timestamp] [$level] $Message"
-    -Add-Content -Path $logfile -value $logentry -encoding UTF8
+Add-Content -Path $logfile -value $logentry -encoding UTF8
     $Color = switch($level) {
         "ERROR" {  "Red"  }
         "WARN"  { "Yellow"}
@@ -41,7 +41,7 @@ if(-not (Test-Path $integrityfile)) {
 $CurrentScriptHash = (Get-FileHash -Path $myinvocation.mycommand.path -Algorithm SHA256).Hash.ToLower()
 $CurrentConfigHash = (Get-FileHash -Path $configfile -Algorithm SHA256).Hash.ToLower()
 
-$IntegrityData = Get-Content $IntegrityFile | Where-Object { $_ -notmatch "^#" -and $_ -trim -ne "" }
+$IntegrityData = Get-Content $integrityfile | Where-Object { $_ -notmatch "^#" -and $_.Trim() -ne "" }
 
 $scriptvalid = $false
 $configvalid = $false
@@ -76,7 +76,7 @@ Write-SecureLog "Integrity check passed. Proceeding with execution of the script
 
 try {
     $B64Content = Get-Content $configfile -raw 
-    $config = Convert-FromBase64Config -B64String $B64Content
+    $config = ConvertFrom-Json $([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($B64Content)))
     if (-not $Config) { throw  "Decoding configuration failed." }
 
 }
@@ -93,7 +93,7 @@ if (-not (Test-DiskSpace -Path $downloadpath -RequiredMB 5000)) {
 }
 
 # Check network connectivity.
-if (-not (Test-Connection -ComputerName https://www.google.com -Count 1 -Quiet)) {
+if (-not (Test-Connection -ComputerName 8.8.8.8 -Count 1 -Quiet)) {
     Write-SecureLog "Fatal: No network connectivity, please check your connection and try again." "ERROR"
     exit 1
 }
@@ -109,6 +109,8 @@ Clear-Host
 Write-Host "Welcome to ISO Downloader Project, Verified & Secure" -ForegroundColor Cyan
 
 Write-Host "Available ISOs:" -ForegroundColor Green
+#Write-Host $config
+Write-Host $config.Targets
 foreach ($iso in $config.Targets.ISOs) {
     Write-Host "[$($iso.ID)] $($iso.Name)"
 }
@@ -125,7 +127,7 @@ if ($Target) {
         $DirectUrl = "https://drive.google.com/file/d/1cifAGLR9rOqvB2m9SJF40fk0N-zqE92K/view?usp=sharing$(Matches[1])"
     }
 
-    $DestFile = Join-Path $downloadpath $Target.Filename
+    $DestFile = Join-Path $downloadpath $Target.FileName
     
     Write-Host ""
     Write-Host ">> Starting download of the ISO..."
@@ -139,13 +141,13 @@ if ($Target) {
                 throw "SHA256 Hash Mismatched, file compromised."
             }
         }
-        Write-Host ">> Download complete and verified." -ForegroundColor Greeen
-        Write-SecureLog "Download succesful: $(Target.FileName)" "INFO"
+        Write-Host ">> Download complete and verified." -ForegroundColor Green
+        Write-SecureLog "Download succesful: $($Target.FileName)" "INFO"
 
         $RufusPath = Join-Path $DownloadPath "rufus.exe"
         if (-not (Test-Path $RufusPath)) {
             Write-Host ">> Rufus not found. Downloading Rufus for you..." -ForegroundColor Yellow
-            Invoke-WebRequest -Uri "https://github.com/pbatard/rufus/releases/download/v3.24/rufus-3.24.exe" -OutFile $RufusPath -UseBasicParsing
+            Invoke-WebRequest -Uri "https://github.com/pbatard/rufus/releases/download/v4.13/rufus-4.13.exe" -OutFile $RufusPath -UseBasicParsing
         }
         Write-Host "Process completed." -ForegroundColor Green
         Invoke -item $downloadpath

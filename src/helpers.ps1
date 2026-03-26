@@ -25,7 +25,7 @@ function Invoke-SecureDelete {
 function Test-DiskSpace {
     param([string]$Path, [long]$RequiredMB)
     $drive = (Get-Item $Path).PSDrive.Root
-    $FreeSpace = (Get-PSDrive $drive).Free / 1MB
+    $FreeSpace = (Get-PSDrive | Where-Object {$_.Root -eq $drive}).Free / 1MB
     if ($FreeSpace -lt $RequiredMB) {
         return $false
     }

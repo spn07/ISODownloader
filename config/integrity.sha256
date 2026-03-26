@@ -1,4 +1,3 @@
-# Format: HASH  FILE_PATH
-# Generate these hashes using: Get-FileHash -Algorithm SHA256 -Path <filedestination>
-INSERT_MAIN_PS1_HASH_HERE  src/main.ps1
-INSERT_SETTINGS_B64_HASH_HERE  config/settings.b64
+﻿# Auto-generated Integrity File
+5A83DCDC240D2D6F86519BCA904AFADD18E653F9516955E29C89983CBC523D8D  src/main.ps1
+41F1A7DF57A7B073BEEDFE0A3F4E75B727612F1B489AB994585470EBBFF7FB3D  config/settings.b64
