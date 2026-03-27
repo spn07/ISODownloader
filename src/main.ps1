@@ -7,7 +7,7 @@ $integrityfile = join-path $rootpath "config\integrity.sha256"
 $configfile = join-path $rootpath "config\settings.b64"
 $logpath = join-path $rootpath "logs"
 $logfile = join-path $logpath "audit_$(Get-Date -Format 'yyyyMMdd_HHmm').log"
-$downloadpath = "$env:USERPROFILE\Downloads"
+$downloadpath = join-path $rootpath "data"
 
 if (-not (test-path $logpath)) { New-Item -ItemType Directory -Path $logpath | Out-Null }
 
@@ -109,8 +109,7 @@ Clear-Host
 Write-Host "Welcome to ISO Downloader Project, Verified & Secure" -ForegroundColor Cyan
 
 Write-Host "Available ISOs:" -ForegroundColor Green
-#Write-Host $config
-Write-Host $config.Targets
+
 foreach ($iso in $config.Targets.ISOs) {
     Write-Host "[$($iso.ID)] $($iso.Name)"
 }
@@ -122,44 +121,33 @@ if ($Selection -eq "0") { exit }
 $Target = $config.Targets.ISOs | Where-Object { $_.ID -eq $Selection}
 
 if ($Target) {
-    $DirectUrl = $Target.URL
-    if ($TargetUrl -match "/file/d/(.*?)/") {
-        $DirectUrl = "https://drive.google.com/file/d/1cifAGLR9rOqvB2m9SJF40fk0N-zqE92K/view?usp=sharing$(Matches[1])"
-    }
-
     $DestFile = Join-Path $downloadpath $Target.FileName
     
+    Write-Host $Target.URL
     Write-Host ""
     Write-Host ">> Starting download of the ISO..."
 
+    #We invoke the webclient, and download the iso
+    $client = New-Object System.Net.WebClient
     try {
-        $Headers = @{ "User-Agent" = "Mozilla/5.0"}
-        Invoke-WebRequest -Uri $DirectUrl -OutFile $Destfile -Headers $Headers -UseBasicParsing -ErrorAction Stop
+        $client.DownloadFile($Target.URL, $DestFile)
         if ($Target.Sha256) {
+            #we check the hash
             $ActualHash = (Get-FileHash -Path $DestFile -Algorithm SHA256).Hash.ToLower()
             if ($ActualHash -ne $Target.Sha256.ToLower()) {
-                throw "SHA256 Hash Mismatched, file compromised."
+                throw "SHA256 Hash Mismatched, file compromised. You need to run the script again!"
             }
         }
         Write-Host ">> Download complete and verified." -ForegroundColor Green
         Write-SecureLog "Download succesful: $($Target.FileName)" "INFO"
-
-        $RufusPath = Join-Path $DownloadPath "rufus.exe"
-        if (-not (Test-Path $RufusPath)) {
-            Write-Host ">> Rufus not found. Downloading Rufus for you..." -ForegroundColor Yellow
-            Invoke-WebRequest -Uri "https://github.com/pbatard/rufus/releases/download/v4.13/rufus-4.13.exe" -OutFile $RufusPath -UseBasicParsing
-        }
-        Write-Host "Process completed." -ForegroundColor Green
-        Invoke -item $downloadpath
     }
     catch {
-        Write-SecureLog "Download failed: $($_.Exception.Message)" "ERROR"
+        Write-SecureLog "Download failed." "ERROR"
+        Write-SecureLog "Reason: $($_.Exception.Message)" "ERROR"
         Write-Host ">> Critical error. Cleaning partial files..." -ForegroundColor Red
         Invoke-SecureDelete -Path $DestFile
         Write-Host ">> Process aborted."   -ForegroundColor Red
-
     }
-
 }
 else {
     Write-Host "Invalid selection!" -ForegroundColor Red
