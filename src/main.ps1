@@ -10,6 +10,7 @@ $logfile = join-path $logpath "audit_$(Get-Date -Format 'yyyyMMdd_HHmm').log"
 $downloadpath = join-path $rootpath "data"
 
 if (-not (test-path $logpath)) { New-Item -ItemType Directory -Path $logpath | Out-Null }
+if (-not (test-path $downloadpath)) { New-Item -ItemType Directory -Path $downloadpath | Out-Null }
 
 function Write-SecureLog {
     param([string]$Message, [string]$level = "INFO")
