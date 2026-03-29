@@ -12,5 +12,5 @@ Secure powershell tool, for downloading my own ISOs.
 ## 
 - **This tool contain 2 of my ISOs:**
 
-> Windows 10 Dev Edition
-> Windows 7 w/ ESU (From June 2024)
+• Windows 10 Dev Edition
+• Windows 7 w/ ESU (From June 2024)
