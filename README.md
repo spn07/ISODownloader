@@ -14,3 +14,7 @@ Secure powershell tool, for downloading my own ISOs.
 
 • Windows 10 Dev Edition
 • Windows 7 w/ ESU (From June 2024)
+
+# Additional Info:
+
+**If script fails, generate a new hash value, via 'hash.ps1'.
