@@ -41,7 +41,7 @@ if ($Target) {
     $DestFile = Join-Path $downloadHelper.downloadPath $Target.FileName
     
     Write-Host ""
-    Write-Host ">> Starting download of the ISO..."
+    Write-Host ">> Downloading.... (check on ~/ISODownloader-main/downloads)"
 
     #We invoke the webclient, and download the iso
     $client = New-Object System.Net.WebClient
