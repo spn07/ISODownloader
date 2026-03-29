@@ -14,6 +14,7 @@ Secure powershell tool, for downloading my own ISOs.
 
 • Windows 10 Dev Edition
 • Windows 7 w/ ESU (From June 2024)
+• FatalityOS10 22H2 x64.
 
 # Additional Info:
 
