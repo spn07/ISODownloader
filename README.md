@@ -17,4 +17,4 @@ Secure powershell tool, for downloading my own ISOs.
 
 # Additional Info:
 
-**If script fails, generate a new hash value, via 'hash.ps1'.
+**If script fails, generate a new hash value, via 'hash.ps1'.**
